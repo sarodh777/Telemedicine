@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#102A4C" />
+    <meta name="description" content="TeleCare - Lightweight Rural Telemedicine Platform designed for poor or unstable internet connectivity." />
+    
+    <!-- PWA Icons & Manifest -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    
+    <!-- Mobile & PWA meta tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="TeleCare" />
+
+    <title>TeleCare — Healthcare Access, Wherever You Are</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script>
+      // Global capture of PWA beforeinstallprompt event so it is never missed by React
+      window.deferredPWAInstallPrompt = null;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        console.log("[PWA] Native beforeinstallprompt captured globally by TeleCare!");
+        e.preventDefault();
+        window.deferredPWAInstallPrompt = e;
+        window.dispatchEvent(new CustomEvent("pwa-prompt-available"));
+      });
+
+      window.addEventListener("appinstalled", () => {
+        console.log("[PWA] TeleCare successfully installed as standalone PWA app!");
+        window.deferredPWAInstallPrompt = null;
+        window.dispatchEvent(new CustomEvent("pwa-app-installed"));
+      });
+
+      // Service Worker Registration
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js", { scope: "/" })
+            .then((reg) => {
+              console.log("[PWA] Service Worker registered successfully, scope:", reg.scope);
+            })
+            .catch((err) => {
+              console.warn("[PWA] Service Worker registration failed:", err);
+            });
+        });
+      }
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
